@@ -1,0 +1,23 @@
+# CI workflow — powered by org-cicd reusable workflow.
+#
+# Runs on every push and pull request to main.
+# Stages: build ──► test ──► security scan (Trivy)
+#
+# See https://github.com/scpsa/org-cicd for full input reference.
+
+name: "CI"
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    uses: scpsa/org-cicd/.github/workflows/java-maven.yml@v1
+    with:
+      java-version: ""            # reads from .tool-versions by default
+      working-directory: "."
+      run-tests: true
+      run-security-scan: true
