@@ -1,23 +1,28 @@
-# CI workflow — powered by org-cicd reusable workflow.
+# CI workflow — powered by org-cicd auto-ci dispatcher.
 #
-# Runs on every push and pull request to main.
+# Triggers only when source code or CI metadata changes.
 # Stages: build ──► test ──► security scan (Trivy)
 #
-# See https://github.com/scpsa/org-cicd for full input reference.
+# Project type is auto-detected from .ci.yaml (or from marker files if absent).
+# See https://github.com/scpsa/org-cicd/blob/main/docs/ci-metadata.md
 
 name: "CI"
 
 on:
   push:
     branches: [main]
+    paths:
+      - "code/**"
+      - ".ci.yaml"
+      - ".ci.yml"
   pull_request:
     branches: [main]
+    paths:
+      - "code/**"
+      - ".ci.yaml"
+      - ".ci.yml"
 
 jobs:
-  ci:
-    uses: scpsa/org-cicd/.github/workflows/java-maven.yml@v1
-    with:
-      java-version: ""            # reads from code/.tool-versions by default
-      working-directory: "code"
-      run-tests: true
-      run-security-scan: true
+  pipeline:
+    uses: scpsa/org-cicd/.github/workflows/auto-ci.yml@v1
+    secrets: inherit
