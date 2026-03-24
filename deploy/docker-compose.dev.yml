@@ -1,0 +1,20 @@
+# Local dev overrides — applied on top of docker-compose.yml.
+# Uses the dev image with bind-mounted source for hot-reload.
+#
+# docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.dev
+    volumes:
+      # Bind-mount source for hot-reload
+      - ../code/src:/app/src
+      # Persist Maven local repo across container restarts
+      - ~/.m2:/root/.m2
+    ports:
+      - "${APP_PORT:-8080}:8080"
+      - "${DEBUG_PORT:-5005}:5005"
+    environment:
+      SPRING_PROFILES_ACTIVE: dev

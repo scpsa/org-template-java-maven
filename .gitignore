@@ -1,8 +1,9 @@
 # Maven build output
-target/
+code/target/
 
 # asdf version shims
 .tool-versions.local
+code/.tool-versions.local
 
 # IDE files
 .idea/
@@ -15,3 +16,6 @@ target/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Environment secrets — never commit .env
+deploy/.env

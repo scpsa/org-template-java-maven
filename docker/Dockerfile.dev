@@ -1,0 +1,22 @@
+# Dev image — only needed when local hot-reload or debugger attach differs from prod.
+# If the dev workflow is the same as prod, delete this file.
+
+FROM eclipse-temurin:25-jdk-noble
+
+WORKDIR /app
+
+# Install Maven to run mvn inside the container during development
+RUN apt-get update -qq && apt-get install -y -qq maven && rm -rf /var/lib/apt/lists/*
+
+COPY code/.tool-versions .
+COPY code/pom.xml .
+RUN --mount=type=cache,target=/root/.m2 \
+    mvn --batch-mode --no-transfer-progress dependency:go-offline -q
+
+COPY code/src ./src
+
+EXPOSE 8080 5005
+
+# Enable remote debugging on port 5005
+ENTRYPOINT ["mvn", "--batch-mode", "spring-boot:run", \
+            "-Dspring-boot.run.jvmArguments=-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"]

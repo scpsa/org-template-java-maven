@@ -1,0 +1,15 @@
+# CODEOWNERS
+#
+# Each line is a file pattern followed by one or more owners.
+# Owners are GitHub usernames or team slugs (@org/team-slug).
+# The last matching pattern takes precedence.
+#
+# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo
+*                   @scpsa/platform-team
+
+# CI / workflow changes require platform-team review
+.github/            @scpsa/platform-team
+docker/             @scpsa/platform-team
+deploy/             @scpsa/platform-team

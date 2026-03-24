@@ -17,7 +17,7 @@ jobs:
   ci:
     uses: scpsa/org-cicd/.github/workflows/java-maven.yml@v1
     with:
-      java-version: ""            # reads from .tool-versions by default
-      working-directory: "."
+      java-version: ""            # reads from code/.tool-versions by default
+      working-directory: "code"
       run-tests: true
       run-security-scan: true

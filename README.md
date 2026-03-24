@@ -2,17 +2,41 @@
 
 > Created from the [org-template-java-maven](https://github.com/scpsa/org-template-java-maven) template.
 
-A minimal Java Maven service with CI pre-wired via [org-cicd](https://github.com/scpsa/org-cicd).
+A Java Maven backend service, pre-wired with CI via [org-cicd](https://github.com/scpsa/org-cicd)
+and a Docker-based deployment layout ready for docker-compose.
 
-## What's included
+---
 
-| File | Purpose |
-|------|---------|
-| `pom.xml` | Maven project descriptor (Java 25, JUnit 5) |
-| `.tool-versions` | [asdf](https://asdf-vm.com/) version pins (Java + Maven) |
-| `.github/workflows/ci.yml` | CI via `org-cicd` — build, test, security scan |
-| `src/main/java/com/example/App.java` | Starter application class |
-| `src/test/java/com/example/AppTest.java` | Starter unit test |
+## Repository layout
+
+```
+svc-name/
+├── code/                        # Application source (Maven project root)
+│   ├── .tool-versions           # asdf version pins (Java + Maven)
+│   ├── pom.xml
+│   └── src/
+│       ├── main/java/com/example/App.java
+│       └── test/java/com/example/AppTest.java
+├── docker/
+│   ├── Dockerfile               # Production multi-stage image
+│   └── Dockerfile.dev           # Dev image with debug port (optional)
+├── deploy/
+│   ├── docker-compose.yml       # Base service definition
+│   ├── docker-compose.prod.yml  # Production overrides
+│   ├── docker-compose.dev.yml   # Local dev overrides
+│   └── .env.example             # Required env vars — copy to .env, never commit .env
+├── docs/                        # Service documentation
+├── ai/prompts/                  # AI prompts and PRDs
+├── .dockerignore
+├── .gitignore
+├── CODEOWNERS
+└── .github/workflows/ci.yml
+```
+
+Naming convention: `svc-<your-service-name>` — see
+[org-cicd repo naming convention](https://github.com/scpsa/org-cicd/blob/main/docs/repo-naming-convention.md).
+
+---
 
 ## CI pipeline
 
@@ -23,23 +47,41 @@ build ──► test ──► security scan (Trivy)
 ```
 
 Powered by [`scpsa/org-cicd/.github/workflows/java-maven.yml@v1`](https://github.com/scpsa/org-cicd).
+See [`org-cicd` docs](https://github.com/scpsa/org-cicd) for the full input reference.
 
-See [`org-cicd` docs](https://github.com/scpsa/org-cicd) for the full list of available inputs.
+---
 
 ## Local setup
 
 ```bash
-# Install asdf plugins + runtime versions
-asdf install
+# 1. Install runtime versions (Java + Maven) via asdf
+cd code && asdf install
 
-# Build
+# 2. Build
 mvn --batch-mode package
 
-# Test
+# 3. Test
 mvn --batch-mode test
 ```
 
-## Customising the CI workflow
+---
+
+## Running with Docker
+
+```bash
+# Copy the env template and fill in real values
+cp deploy/.env.example deploy/.env
+
+# Production
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.prod.yml up -d
+
+# Local dev (hot-reload + debug port 5005)
+docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml up
+```
+
+---
+
+## Adjusting the CI workflow
 
 Edit `.github/workflows/ci.yml`:
 
@@ -49,14 +91,17 @@ jobs:
     uses: scpsa/org-cicd/.github/workflows/java-maven.yml@v1
     with:
       java-version: "temurin-25.0.2+10.0.LTS"  # override if needed
-      working-directory: "."                    # path to pom.xml directory
+      working-directory: "code"                 # path to pom.xml directory
       run-tests: true
       run-security-scan: true
       trivy-severity: "CRITICAL,HIGH"
 ```
 
+---
+
 ## Renaming the project
 
-1. Update `groupId`, `artifactId`, and `name` in `pom.xml`.
-2. Rename the package directory `src/main/java/com/example` → your package.
+1. Update `groupId`, `artifactId`, and `name` in `code/pom.xml`.
+2. Rename the package directory `code/src/main/java/com/example` → your package path.
 3. Update the `package` declaration in `App.java` and `AppTest.java`.
+4. Update `IMAGE_NAME` in `deploy/.env.example` (and your `.env`).
